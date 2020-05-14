@@ -15,6 +15,7 @@ namespace WebApplicationNetLab.Models
         [StringLength(100, MinimumLength = 3)]
         public string Title { get; set; }
         [Range(0, 5)]
+        [Display(Name = "Importance")]
         public int Credits { get; set; }
 
         public virtual ICollection<Enrollment> Enrollments { get; set; }
