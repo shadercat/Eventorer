@@ -10,6 +10,7 @@ namespace WebApplicationNetLab.Models
     {
         public int ID { get; set; }
         [StringLength(100)]
+        [RegularExpression(@"^.+@.+$", ErrorMessage = "It must be email adress.")]
         public string Email { get; set; }
         [StringLength(100, ErrorMessage = "Nickname cannot be longer than 100 characters.")]
         public string Nickname { get; set; }
