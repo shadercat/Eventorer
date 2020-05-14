@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApplicationNetLab.Models
 {
@@ -15,6 +16,8 @@ namespace WebApplicationNetLab.Models
         public int EnrollmentID { get; set; }
         public int EventID { get; set; }
         public int AccountID { get; set; }
+
+        [DisplayFormat(NullDisplayText = "No grade")]
         public Grade? Grade { get; set; }
 
         public virtual Event Event { get; set; }
