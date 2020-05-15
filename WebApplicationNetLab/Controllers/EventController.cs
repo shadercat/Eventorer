@@ -20,9 +20,32 @@ namespace WebApplicationNetLab.Controllers
         private EventorerContext db = new EventorerContext();
 
         // GET: Event
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(string sortOrder, string searchString)
         {
-            return View(await db.Events.ToListAsync());
+            ViewBag.IdSortParm = String.IsNullOrEmpty(sortOrder) ? "event_id_desc" : "";
+            ViewBag.TitleSortParm = sortOrder == "Title" ? "title_desc" : "Title";
+            var events = from s in db.Events
+                         select s;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                events = events.Where(s => s.Title.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "event_id_desc":
+                    events = events.OrderByDescending(s => s.EventID);
+                    break;
+                case "Title":
+                    events = events.OrderBy(s => s.Title);
+                    break;
+                case "title_desc":
+                    events = events.OrderByDescending(s => s.Title);
+                    break;
+                default:
+                    events = events.OrderBy(s => s.EventID);
+                    break;
+            }
+            return View(await events.ToListAsync());
         }
 
         // GET: Event/Details/5
