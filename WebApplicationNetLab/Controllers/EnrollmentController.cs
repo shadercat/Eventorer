@@ -9,6 +9,7 @@ using System.Web;
 using System.Web.Mvc;
 using WebApplicationNetLab.DAL;
 using WebApplicationNetLab.Models;
+using PagedList.EntityFramework;
 
 namespace WebApplicationNetLab.Controllers
 {
@@ -17,10 +18,46 @@ namespace WebApplicationNetLab.Controllers
         private EventorerContext db = new EventorerContext();
 
         // GET: Enrollment
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.EmailSortParm = String.IsNullOrEmpty(sortOrder) ? "email_desc" : "";
+            ViewBag.TitleSortParm = sortOrder == "Title" ? "title_desc" : "Title";
+            if(searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewBag.CurrentFilter = searchString;
+
             var enrollments = db.Enrollments.Include(e => e.Account).Include(e => e.Event);
-            return View(await enrollments.ToListAsync());
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                enrollments = enrollments.Where(s => s.Account.Email.Contains(searchString)
+                || s.Event.Title.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "email_desc":
+                    enrollments = enrollments.OrderByDescending(s => s.Account.Email);
+                    break;
+                case "Title":
+                    enrollments = enrollments.OrderBy(s => s.Event.Title);
+                    break;
+                case "title_desc":
+                    enrollments = enrollments.OrderByDescending(s => s.Event.Title);
+                    break;
+                default:
+                    enrollments = enrollments.OrderBy(s => s.Account.Email);
+                    break;
+            }
+            int pageSize = 5;
+            int pageNumber = (page ?? 1);
+            return View(await enrollments.ToPagedListAsync(pageNumber, pageSize));
         }
 
         // GET: Enrollment/Details/5
