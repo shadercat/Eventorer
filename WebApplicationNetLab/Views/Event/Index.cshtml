@@ -1,5 +1,6 @@
-﻿@model IEnumerable<WebApplicationNetLab.Models.Event>
-
+﻿@model PagedList.IPagedList<WebApplicationNetLab.Models.Event>
+@using PagedList.Mvc
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
 @{
     ViewBag.Title = "Events";
 }
@@ -9,10 +10,10 @@
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
-@using (Html.BeginForm())
+@using (Html.BeginForm("Index", "Event", FormMethod.Get))
 {
     <p>
-        Find by title: @Html.TextBox("SearchString")
+        Find by title: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
         <input type="submit" value="Search" />
     </p>
 }
@@ -20,10 +21,10 @@
     <tr>
         <th>
 
-            @Html.ActionLink("Event ID", "Index", new { sortOrder = ViewBag.IdSortParm })
+            @Html.ActionLink("Event ID", "Index", new { sortOrder = ViewBag.IdSortParm, currentFilter = ViewBag.CurrentFilter })
         </th>
         <th>
-            @Html.ActionLink("Title", "Index", new { sortOrder = ViewBag.TitleSortParm })
+            @Html.ActionLink("Title", "Index", new { sortOrder = ViewBag.TitleSortParm, currentFilter = ViewBag.CurrentFilter })
         </th>
         <th>
             Importance
@@ -52,3 +53,8 @@
     }
 
 </table>
+<br />
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index",
+    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))

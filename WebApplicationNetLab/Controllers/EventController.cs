@@ -12,6 +12,7 @@ using WebApplicationNetLab.Models;
 using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
 using System.Data.Entity.Core;
+using PagedList.EntityFramework;
 
 namespace WebApplicationNetLab.Controllers
 {
@@ -20,10 +21,21 @@ namespace WebApplicationNetLab.Controllers
         private EventorerContext db = new EventorerContext();
 
         // GET: Event
-        public async Task<ActionResult> Index(string sortOrder, string searchString)
+        public async Task<ActionResult> Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
+            ViewBag.CurrentSort = sortOrder;
             ViewBag.IdSortParm = String.IsNullOrEmpty(sortOrder) ? "event_id_desc" : "";
             ViewBag.TitleSortParm = sortOrder == "Title" ? "title_desc" : "Title";
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewBag.CurrentFilter = searchString;
             var events = from s in db.Events
                          select s;
             if (!String.IsNullOrEmpty(searchString))
@@ -45,7 +57,9 @@ namespace WebApplicationNetLab.Controllers
                     events = events.OrderBy(s => s.EventID);
                     break;
             }
-            return View(await events.ToListAsync());
+            int pageSize = 5;
+            int pageNumber = (page ?? 1);
+            return View(await events.ToPagedListAsync(pageNumber, pageSize));
         }
 
         // GET: Event/Details/5
